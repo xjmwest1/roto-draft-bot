@@ -1,0 +1,5 @@
+.env
+GOOGLE_APPLICATION_CREDENTIALS.json
+node_modules/
+dist/
+draft-bot.db
