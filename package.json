@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "node --loader ts-node/esm src/app.ts",
-    "start": "node --loader ts-node/esm src/app.ts",
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/src/app.js",
     "inspect-sheet": "node --loader ts-node/esm scripts/inspect-sheet.ts",
     "test-domain": "node --loader ts-node/esm scripts/test-domain.ts"
   },
