@@ -8,7 +8,7 @@ services:
     branch: main
 
     buildCommand: |
-      export NODE_OPTIONS=--max-old-space-size=512
+      export NODE_OPTIONS=--max-old-space-size=1536
       corepack enable
       pnpm install --frozen-lockfile --ignore-scripts
       pnpm rebuild
