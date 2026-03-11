@@ -20,7 +20,7 @@ export class DraftBot {
     });
 
     console.log('📦 Initializing ConfigStore...');
-    this.configStore = new ConfigStore();
+    this.configStore = new ConfigStore(process.env.SQLITE_PATH);
     
     console.log('⚙️ Setting up event handlers...');
     this.setupEventHandlers();
