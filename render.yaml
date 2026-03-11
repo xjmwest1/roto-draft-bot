@@ -10,8 +10,9 @@ services:
     buildCommand: |
       export NODE_OPTIONS=--max-old-space-size=1536
       corepack enable
-      pnpm install --frozen-lockfile --ignore-scripts
-      pnpm rebuild
+      corepack prepare pnpm@9.15.9 --activate
+      pnpm install --frozen-lockfile
+      pnpm rebuild better-sqlite3
       pnpm build
 
     startCommand: sh scripts/render-start.sh
