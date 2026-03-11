@@ -7,4 +7,4 @@ if [ -n "${GOOGLE_SERVICE_ACCOUNT_JSON:-}" ]; then
   printf "%s" "$GOOGLE_SERVICE_ACCOUNT_JSON" > /var/data/google-credentials.json
 fi
 
-exec node dist/app.js
+exec node dist/src/app.js
