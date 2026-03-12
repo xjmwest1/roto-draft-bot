@@ -97,7 +97,7 @@ export class DraftPoller {
           const playerName = pick.player;
 
           // Build announcement
-          let announcement = `🎯 **${playerName}** picked **${cardName}**.\n`;
+          let announcement = `⛏️ **${playerName}** picked **${cardName}**.\\n`;
 
           // Fetch updated state to get the next drafter
           const updatedState = await this.draftService.getDraftState(draftChannel.sheetId, guild || undefined);

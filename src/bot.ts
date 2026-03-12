@@ -415,31 +415,6 @@ export class DraftBot {
         content: `✅ Pick confirmed: **${cardName}** by ${userDrafter.name}`,
       });
 
-      // Get the channel to send the announcement
-      const channel = await this.client.channels.fetch(channelId).catch(() => null);
-      if (!channel || !('send' in channel)) {
-        console.error('Could not find text channel for announcement');
-        return;
-      }
-
-      // Re-read state to get the next drafter
-      const updatedState = await this.draftService!.getDraftState(draftChannel.sheetId, guild || undefined);
-      const nextDrafter = updatedState.currentDrafter;
-
-      // Build announcement
-      let announcement = `⛏️ **${userDrafter.name}** picked **${cardName}**.\n`;
-      
-      if (nextDrafter) {
-        // Try to find Discord user for pinging
-        const mentionStr = nextDrafter.discordId 
-          ? `<@${nextDrafter.discordId}>`
-          : nextDrafter.name;
-        announcement += `\nYou're up ${mentionStr}!`;
-      }
-
-      // Send announcement to the channel
-      await channel.send(announcement);
-
       // Clear the card cache since the draft state changed
       this.cardCache.delete(draftChannel.sheetId);
     } catch (error) {
