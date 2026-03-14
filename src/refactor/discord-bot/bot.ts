@@ -52,7 +52,26 @@ class DiscordBot {
     this.poller.stop()
     
     this.snapshotStore.close()
+    await this.announceShutdown()
     await this.client.destroy()
+  }
+
+  private async announceShutdown() {
+    const draftChannels = this.snapshotStore.getAllDraftChannels()
+    const announcement = 'My service is restarting, in a minute please reattach the draft spreadsheet using /draft attach'
+
+    const announcementPromises = draftChannels.map(async (draftChannel) => {
+      const { channelId } = draftChannel
+      const channel = await this.client.channels.fetch(channelId).catch(() => null);
+
+      if(!channel?.isSendable()) {
+        return
+      }
+
+      await channel.send(announcement);
+    })
+
+    return Promise.allSettled(announcementPromises)
   }
 
   // TODO refactor
