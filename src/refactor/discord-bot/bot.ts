@@ -198,9 +198,10 @@ class DiscordBot {
 
       const updatedState = await this.draftService.getDraftState(draftChannel);
       const nextDrafter = updatedState?.currentDrafter;
-      const nextDrafterDiscordId = await this.snapshotStore.getPlayerDiscordId(guildId, playerName)
+      
 
       if (nextDrafter) {
+        const nextDrafterDiscordId = await this.snapshotStore.getPlayerDiscordId(guildId, nextDrafter.name)
         const mentionStr = nextDrafterDiscordId
           ? `<@${nextDrafterDiscordId.discordId}>`
           : nextDrafter.name;
