@@ -327,7 +327,7 @@ class DiscordBot {
 
     const channelId = match[1];
     const cardName = match[2];
-    const username = interaction.user.username;
+    const discordId = interaction.user.id;
 
     const draftChannel = this.snapshotStore.getDraftChannel(channelId);
     if (!draftChannel) {
@@ -365,7 +365,13 @@ class DiscordBot {
         });
       }
 
-      const userDrafter = draftState.players.find(async (player) => player.discordUsername === username)
+      const userDrafter = draftState.players.find(async (player) => {
+        if (!guild) {
+          return false
+        }
+        const id = this.snapshotStore.getPlayerDiscordId(guild?.id, player.name)
+        return id?.discordId === discordId
+      })
 
       if (!userDrafter || userDrafter.discordUsername !== currentDrafter?.discordUsername) {
         return interaction.editReply({
