@@ -1,5 +1,5 @@
 import dotenv from 'dotenv';
-import { DraftBot } from './bot.js';
+import { DiscordBot } from './refactor/discord-bot/bot.js'
 
 dotenv.config();
 
@@ -17,7 +17,7 @@ process.on('uncaughtException', (error) => {
 
 try {
   console.log('Starting application...');
-  const bot = new DraftBot();
+  const bot = new DiscordBot();
 
   console.log('Logging in bot...');
   bot.login().catch((error) => {

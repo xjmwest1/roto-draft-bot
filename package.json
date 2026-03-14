@@ -8,7 +8,8 @@
     "build": "tsc -p tsconfig.json",
     "start": "node dist/src/app.js",
     "inspect-sheet": "node --loader ts-node/esm scripts/inspect-sheet.ts",
-    "test-domain": "node --loader ts-node/esm scripts/test-domain.ts"
+    "test-domain": "node --loader ts-node/esm scripts/test-domain.ts",
+    "test-refactor": "node --loader ts-node/esm scripts/test-refactor.ts"
   },
   "devDependencies": {
     "@swc/core": "^1.15.18",
