@@ -1,11 +1,11 @@
-import { ActionRowBuilder, AutocompleteInteraction, BaseInteraction, ButtonBuilder, ButtonInteraction, ButtonStyle, CacheType, ChatInputCommandInteraction, Client, EmbedBuilder, GatewayIntentBits, Guild, Interaction, REST, Routes, SlashCommandBuilder } from 'discord.js'
+import { ActionRowBuilder, AutocompleteInteraction, BaseInteraction, ButtonBuilder, ButtonInteraction, ButtonStyle, CacheType, ChatInputCommandInteraction, Client, codeBlock, EmbedBuilder, GatewayIntentBits, Guild, Interaction, REST, Routes, SlashCommandBuilder } from 'discord.js'
 import { Poller } from '../poller/index.js'
 import { DraftSnapshotStore } from '../draft-snapshot-store/index.js'
 import { GoogleSheetsRepository } from '../google-sheet/index.js'
 import { DraftService } from '../draft-service/index.js'
 import { DraftChannel } from '../draft-snapshot-store/types.js'
 import { filterCards, queryScryfallCard } from './autocomplete.js'
-import { Player } from '../draft-service/types.js'
+import { Player, PlayerFromSheet } from '../draft-service/types.js'
 
 class DiscordBot {
   private client: Client
@@ -13,6 +13,7 @@ class DiscordBot {
   private sheetsRepository: GoogleSheetsRepository
   private snapshotStore: DraftSnapshotStore
   private draftService: DraftService
+  private state: 'logging_in' | 'logged_in' | 'logging_out' | 'logged_out' = 'logged_out'
 
   constructor() {
     this.client = new Client({
@@ -28,7 +29,7 @@ class DiscordBot {
   }
 
   private init() {
-     console.log(`✅ Bot logged in as ${this.client?.user?.tag}`);
+    console.log(`✅ Bot logged in as ${this.client?.user?.tag}`);
     this.registerSlashCommands();
     
     this.poller.start();
@@ -39,6 +40,11 @@ class DiscordBot {
   }
 
   async login() {
+    if (this.state === 'logging_in' || this.state === 'logged_in') {
+      return
+    }
+
+    this.state = 'logging_in'
     const TOKEN = process.env.DISCORD_TOKEN
     
     if (!TOKEN) {
@@ -46,29 +52,37 @@ class DiscordBot {
     }
 
     await this.client.login(TOKEN)
+    this.state = 'logged_in'
   }
 
   async logout() {
-    this.poller.stop()
-    
-    this.snapshotStore.close()
+    if (this.state === 'logging_out' || this.state === 'logged_out') {
+      return
+    }
+
+    this.state = 'logging_out'
     await this.announceShutdown()
+
+    this.poller.stop()    
+    this.snapshotStore.close()
     await this.client.destroy()
+    this.state = 'logged_out'
   }
 
   private async announceShutdown() {
     const draftChannels = this.snapshotStore.getAllDraftChannels()
-    const announcement = 'My service is restarting, in a minute please reattach the draft spreadsheet using /draft attach'
-
+    const announcement = 'My service is restarting, in a minute please reattach the draft spreadsheet using the following command'
+    draftChannels.map((channel) => console.log(channel.sheetUrl))
     const announcementPromises = draftChannels.map(async (draftChannel) => {
-      const { channelId } = draftChannel
+      const { channelId, sheetUrl } = draftChannel
       const channel = await this.client.channels.fetch(channelId).catch(() => null);
 
       if(!channel?.isSendable()) {
         return
       }
 
-      await channel.send(announcement);
+      const attachCommand = `/draft attach sheet_url:${sheetUrl}`
+      await channel.send(`${announcement}\n${codeBlock(attachCommand)}`);
     })
 
     return Promise.allSettled(announcementPromises)
@@ -158,7 +172,7 @@ class DiscordBot {
   }
 
   // TODO refactor
-  private async resolvePlayerDiscordIds(players: Player[], guild: Guild) {
+  private async resolvePlayerDiscordIds(players: PlayerFromSheet[], guild: Guild) {
     for (const player of players) {
       try {
         // Try to find member by username
@@ -384,15 +398,25 @@ class DiscordBot {
         });
       }
 
-      const userDrafter = draftState.players.find(async (player) => {
-        if (!guild) {
-          return false
-        }
-        const id = this.snapshotStore.getPlayerDiscordId(guild?.id, player.name)
-        return id?.discordId === discordId
-      })
+      if (!guild) {
+        return
+      }
 
-      if (!userDrafter || userDrafter.discordUsername !== currentDrafter?.discordUsername) {
+      const userDrafter = draftState.players
+        .map((player) => {
+          const id = this.snapshotStore.getPlayerDiscordId(guild.id, player.name)
+          return {
+            ...player,
+            discordId: id?.discordId
+          } as Player
+        })
+        .filter((player) => !!player)
+        .find((player) => player.discordId === discordId)
+
+      const currentDrafterDiscordId = this.snapshotStore.getPlayerDiscordId(guild.id, currentDrafter.name)?.discordId
+
+      console.log('user', userDrafter?.discordId, 'current', currentDrafterDiscordId)
+      if (!userDrafter || userDrafter.discordId !== currentDrafterDiscordId) {
         return interaction.editReply({
           content: `❌ It is not your turn. ${currentDrafter.name} is up.`,
         });

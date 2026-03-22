@@ -1,7 +1,10 @@
 type Player = {
   name: string
   discordUsername: string
+  discordId: string
 }
+
+type PlayerFromSheet = Omit<Player, 'discordId'>
 
 type Card = {
   name: string
@@ -13,10 +16,10 @@ type DraftPick = {
 }
 
 type DraftState = {
-  players: Player[];
+  players: PlayerFromSheet[];
   availableCards: Card[];
   picks: DraftPick[];
-  currentDrafter?: Player;
+  currentDrafter?: PlayerFromSheet;
 }
 
 type MakePickResult =
@@ -39,6 +42,7 @@ type ValidatePickResult =
 
 export type {
   Player,
+  PlayerFromSheet,
   Card,
   DraftPick,
   DraftState,
