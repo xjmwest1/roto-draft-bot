@@ -1,0 +1,3 @@
+allowBuilds:
+  '@swc/core': false
+  better-sqlite3: false

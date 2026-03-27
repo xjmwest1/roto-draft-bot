@@ -1,5 +1,5 @@
 import dotenv from 'dotenv';
-import { DiscordBot } from './refactor/discord-bot/bot.js'
+import { DiscordBot } from './interface/discord/bot.js'
 
 dotenv.config();
 

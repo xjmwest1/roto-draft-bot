@@ -19,11 +19,16 @@
     "typescript": "^5.9.3"
   },
   "dependencies": {
-    "better-sqlite3": "^11.7.0",
+    "better-sqlite3": "^12.1.0",
     "discord.js": "^14.16.3",
     "dotenv": "^17.3.1",
     "google-auth-library": "^10.6.1",
     "googleapis": "^121.0.0"
   },
-  "packageManager": "pnpm@9.15.9"
+  "packageManager": "pnpm@10.33.0",
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "better-sqlite3"
+    ]
+  }
 }

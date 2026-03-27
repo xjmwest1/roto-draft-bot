@@ -2,7 +2,15 @@
 import {google} from 'googleapis';
 import {GoogleAuth} from 'google-auth-library';
 import fs from 'fs';
-import { Player, Card, DraftPick, SheetData } from '../src/sheets-repository.js';
+
+type Player = { name: string; discord?: string };
+type Card = { picked: boolean; name: string; picked_by?: string };
+type DraftPick = { player: string; cards: string[] };
+type SheetData = {
+  setup: { players: Player[] };
+  cube: { cards: Card[] };
+  draft: { picks: DraftPick[] };
+};
 
 async function main() {
   const sheetId = process.env.SHEET_ID || process.argv[2];
@@ -66,7 +74,7 @@ async function main() {
         }
       }
       console.log(`Detected players (${sheetData.setup.players.length}):`);
-      sheetData.setup.players.forEach((p, i) => {
+      sheetData.setup.players.forEach((p: Player, i: number) => {
         console.log(`  ${i}: ${p.name}${p.discord ? ` (${p.discord})` : ''}`);
       });
     }
@@ -85,7 +93,7 @@ async function main() {
           picked_by: undefined,
         });
       });
-      const pickedCount = sheetData.cube.cards.filter(c => c.picked).length;
+      const pickedCount = sheetData.cube.cards.filter((c: Card) => c.picked).length;
       console.log(`Total valid cards: ${sheetData.cube.cards.length}`);
       console.log(`Picked cards: ${pickedCount}`);
       console.log(`Available cards: ${sheetData.cube.cards.length - pickedCount}`);
@@ -316,9 +324,9 @@ async function main() {
       }
 
       // Update cube with picked_by info
-      sheetData.draft.picks.forEach(pick => {
-        pick.cards.forEach(card => {
-          const cubeCard = sheetData.cube.cards.find(c => c.name === card);
+      sheetData.draft.picks.forEach((pick: DraftPick) => {
+        pick.cards.forEach((card: string) => {
+          const cubeCard = sheetData.cube.cards.find((c: Card) => c.name === card);
           if (cubeCard) {
             cubeCard.picked = true;
             cubeCard.picked_by = pick.player;

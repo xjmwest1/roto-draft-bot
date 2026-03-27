@@ -1,6 +1,5 @@
-import { DraftService } from '../src/refactor/draft-service/service.js'
-import { DraftSnapshotStore } from '../src/refactor/draft-snapshot-store/store.js'
-import { GoogleSheetsRepository } from '../src/refactor/google-sheet/index.js';
+import { GoogleSheetsDraftRepository } from '../src/external/google-sheets/google-sheets-draft-repository.js';
+import { SqliteDraftStore } from '../src/external/sqlite/sqlite-draft-store.js';
 import dotenv from 'dotenv';
 
 dotenv.config()
@@ -12,8 +11,8 @@ async function main() {
     process.exit(1);
   }
 
-  const sheetRepo = new GoogleSheetsRepository();
-  const snapshotStore = new DraftSnapshotStore()
+  const draftRepo = new GoogleSheetsDraftRepository();
+  const snapshotStore = new SqliteDraftStore()
 
     snapshotStore.savePlayerDiscordId('123', 'John1', 'id-john1')
   snapshotStore.savePlayerDiscordId('123', 'John2', 'id-john2')
@@ -25,18 +24,9 @@ async function main() {
   snapshotStore.savePlayerDiscordId('123', 'John8', 'id-john8')
 
 
-  const draftService = new DraftService(sheetRepo)
-  
   try {
     console.log('Getting draft state')
-    const draftState = await draftService.getDraftState({
-      channelId: '123',
-      createdAt: new Date(),
-      guildId: '123',
-      sheetId,
-      sheetUrl: '123',
-      updatedAt: new Date(),
-    })
+    const draftState = await draftRepo.getDraftState(sheetId)
     console.log(draftState)
 
     console.log('Done');
