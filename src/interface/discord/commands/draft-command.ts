@@ -146,9 +146,9 @@ export function createDraftCommand(): CommandModule {
       });
     },
     onButton: async (interaction, ctx) => {
-      await interaction.deferReply({ ephemeral: true });
-
       if (interaction.customId === 'draft:queue:clear') {
+        await interaction.deferReply({ ephemeral: true });
+
         const draftStatus = await ctx.getDraftStatus.execute({ channelId: interaction.channelId })
 
         if (!draftStatus.ok) {
